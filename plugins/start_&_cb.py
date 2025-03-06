@@ -125,7 +125,7 @@ async def remove_premium(bot: Client, message: Message):
     except Exception as e:
         await message.reply_text(f"Error: {e}\nUsage: /remove_premium @username/userid")
 
-@Client.on_message(filters.private & filters.command(["token", "mytokens"]))
+@Client.on_message(filters.private & filters.command(["token", "mytokens", "bal"]))
 async def check_tokens(client, message: Message):
     user_id = message.from_user.id
     user_data = await codeflixbots.col.find_one({"_id": user_id})
