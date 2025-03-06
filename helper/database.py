@@ -183,4 +183,83 @@ class Database:
             logging.error(f"Error getting token for user {user_id}: {e}")
             return 69
 
+        async def set_media_preference(self, id, media_type):
+        try:
+            await self.col.update_one(
+                {"_id": int(id)}, {"$set": {"media_type": media_type}}
+            )
+        except Exception as e:
+            logging.error(f"Error setting media preference for user {id}: {e}")
+
+    async def get_media_preference(self, id):
+        try:
+            user = await self.col.find_one({"_id": int(id)})
+            return user.get("media_type", None) if user else None
+        except Exception as e:
+            logging.error(f"Error getting media preference for user {id}: {e}")
+            return None
+
+    async def get_metadata(self, user_id):
+        user = await self.col.find_one({'_id': int(user_id)})
+        return user.get('metadata', "Off")
+
+    async def set_metadata(self, user_id, metadata):
+        await self.col.update_one({'_id': int(user_id)}, {'$set': {'metadata': metadata}})
+
+    async def get_title(self, user_id):
+        user = await self.col.find_one({'_id': int(user_id)})
+        return user.get('title', 'GenAnimeOfc [t.me/GenAnimeOfc]')
+
+    async def set_title(self, user_id, title):
+        await self.col.update_one({'_id': int(user_id)}, {'$set': {'title': title}})
+
+    async def get_author(self, user_id):
+        user = await self.col.find_one({'_id': int(user_id)})
+        return user.get('author', 'DARKXSIDE78')
+
+    async def set_author(self, user_id, author):
+        await self.col.update_one({'_id': int(user_id)}, {'$set': {'author': author}})
+
+    async def get_artist(self, user_id):
+        user = await self.col.find_one({'_id': int(user_id)})
+        return user.get('artist', 'DARKXSIDE78')
+
+    async def set_artist(self, user_id, artist):
+        await self.col.update_one({'_id': int(user_id)}, {'$set': {'artist': artist}})
+
+    async def get_audio(self, user_id):
+        user = await self.col.find_one({'_id': int(user_id)})
+        return user.get('audio', '[GenAnimeOfc]')
+
+    async def set_audio(self, user_id, audio):
+        await self.col.update_one({'_id': int(user_id)}, {'$set': {'audio': audio}})
+
+    async def get_subtitle(self, user_id):
+        user = await self.col.find_one({'_id': int(user_id)})
+        return user.get('subtitle', "[GenAnimeOfc]")
+
+    async def set_subtitle(self, user_id, subtitle):
+        await self.col.update_one({'_id': int(user_id)}, {'$set': {'subtitle': subtitle}})
+
+    async def get_video(self, user_id):
+        user = await self.col.find_one({'_id': int(user_id)})
+        return user.get('video', '[GenAnimeOfc]')
+
+    async def set_video(self, user_id, video):
+        await self.col.update_one({'_id': int(user_id)}, {'$set': {'video': video}})
+
+    async def get_encoded_by(self, user_id):
+        user = await self.col.find_one({'_id': int(user_id)})
+        return user.get('encoded_by', "GenAnimeOfc [DARKXSIDE78]")
+
+    async def set_encoded_by(self, user_id, encoded_by):
+        await self.col.update_one({'_id': int(user_id)}, {'$set': {'encoded_by': encoded_by}})
+        
+    async def get_custom_tag(self, user_id):
+        user = await self.col.find_one({'_id': int(user_id)})
+        return user.get('customtag', "[GenAnimeOfc]")
+
+    async def set_custom_tag(self, user_id, custom_tag):
+        await self.col.update_one({'_id': int(user_id)}, {'$set': {'custom_tag': custom_tag}})
+
 codeflixbots = Database(Config.DB_URL, Config.DB_NAME)
