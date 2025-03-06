@@ -429,10 +429,11 @@ async def auto_rename_files(client, message: Message):
                 )
         except Exception as e:
             os.remove(renamed_file_path)
-            if ph_path:
-                os.remove(ph_path)
-            # Mark the file as ignored
-            return await upload_msg.edit(f"Error: {e}")
+            if os.path.exists(renamed_file_path):
+                try:
+                    os.remove(renamed_file_path)
+                except Exception as e:
+                    logging.error(f"Error deleting file: {e}")
 
         await download_msg.delete() 
         os.remove(file_path)
