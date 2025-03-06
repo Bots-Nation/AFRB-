@@ -33,13 +33,17 @@ async def restart_bot(b, m):
 async def show_leaderboard(bot: Client, message: Message):
     try:
         users = await codeflixbots.col.find().sort("rename_count", -1).limit(10).to_list(10)
-        leaderboard = ["🏆 **Top 10 Renamers** 🏆\n"]
+        leaderboard = ["<b>🏆 Top 10 Renamers 🏆</b>\n"]
         
         for idx, user in enumerate(users, 1):
-            name = user.get('first_name', 'Unknown')
-            username = f"@{user['username']}" if user.get('username') else "No Username"
+            name = user.get('first_name', 'Unknown').strip() or "Anonymous"
+            username = f"@{user['username']}" if user.get('username') else "No UN"
             count = user.get('rename_count', 0)
-            leaderboard.append(f"{idx}) {name} {username} - {count} files")
+            leaderboard.append(
+                f"<b>{idx}.</b> {name} "
+                f"<i>({username})</i> ➠ "
+                f"<code>{count}</code> ✨"
+            )
         
         await message.reply_text("\n".join(leaderboard))
     except Exception as e:
