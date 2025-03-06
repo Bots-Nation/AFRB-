@@ -51,6 +51,8 @@ class Database:
             try:
                 await self.col.insert_one(user)
                 logging.info(f"User {u.id} added to database")
+            except Exception as e:
+                logging.error(f"Error adding user {u.id} to database: {e}")
 
     async def is_user_exist(self, id):
         try:
