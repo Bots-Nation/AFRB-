@@ -14,22 +14,6 @@ import string
 import logging
 import pytz
 
-@Client.on_message(filters.command("leadboard") & filters.user(Config.ADMIN))
-async def show_leaderboard(bot: Client, message: Message):
-    try:
-        users = await codeflixbots.col.find().sort("rename_count", -1).limit(10).to_list(10)
-        leaderboard = ["🏆 **Top 10 Renamers** 🏆\n"]
-        
-        for idx, user in enumerate(users, 1):
-            name = user.get('first_name', 'Unknown')
-            username = f"@{user['username']}" if user.get('username') else "No Username"
-            count = user.get('rename_count', 0)
-            leaderboard.append(f"{idx}) {name} {username} - {count} files")
-        
-        await message.reply_text("\n".join(leaderboard))
-    except Exception as e:
-        await message.reply_text(f"Error generating leaderboard: {e}")
-
 @Client.on_message(filters.command("add_token") & filters.user(Config.ADMIN))
 async def add_tokens(bot: Client, message: Message):
     try:
@@ -270,10 +254,10 @@ async def generate_token(client: Client, message: Message):
 
 async def handle_token_redemption(client: Client, message: Message, token_id: str):
     user_id = message.from_user.id
-    db = codeflixbots
     
     try:
-        token_data = await db.get_token_link(token_id)
+        # Retrieve token data from the database
+        token_data = await codeflixbots.get_token_link(token_id)
         
         if not token_data:
             return await message.reply("❌ Invalid or expired token link")
@@ -281,19 +265,26 @@ async def handle_token_redemption(client: Client, message: Message, token_id: st
         if token_data['used']:
             return await message.reply("❌ This link has already been used")
         
-        if datetime.now(pytz.utc) > token_data['expiry'].replace(tzinfo=pytz.utc):
-            return await message.reply("❌ Token link has expired")
+        # Convert stored naive datetime to UTC-aware datetime
+        expiry_utc = token_data['expiry'].replace(tzinfo=pytz.UTC)
+        
+        if datetime.now(pytz.UTC) > expiry_utc:
+            return await message.reply("❌ Token expired")
         
         if token_data['user_id'] != user_id:
             return await message.reply("❌ This token link belongs to another user")
         
-        # Add tokens to user's account
-        current_tokens = await db.get_token(user_id)
-        new_tokens = current_tokens + token_data['tokens']
-        await db.set_token(user_id, new_tokens)
-        await db.mark_token_used(token_id)
+        # Atomic update of tokens in the database using update_one
+        await codeflixbots.col.update_one(
+            {"_id": user_id},
+            {"$inc": {"token": token_data['tokens']}}
+        )
+        
+        # Mark the token as used
+        await codeflixbots.mark_token_used(token_id)
         
         await message.reply(f"✅ Success! {token_data['tokens']} tokens added to your account!")
+    
     except Exception as e:
         logging.error(f"Error during token redemption: {e}")
         await message.reply("❌ An error occurred while processing your request. Please try again.")
