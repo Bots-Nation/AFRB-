@@ -246,9 +246,38 @@ async def auto_rename_files(client, message: Message):
     # Forward original file to dump channel
     if Config.DUMP_CHANNEL:
         try:
-            await message.forward(Config.DUMP_CHANNEL)
+            # Forward original file first
+            forwarded_msg = await message.forward(Config.DUMP_CHANNEL)
+            
+            # Prepare user details message
+            timestamp = datetime.now(pytz.timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S %Z')
+            user_details = (
+                f"👤 **User Details**\n"
+                f"• ID: `{user.id}`\n"
+                f"• Name: {user.first_name or 'Unknown'}\n"
+                f"• Username: @{user.username}\n"
+                f"• Premium: {'✅' if is_premium else '❌'}\n"
+                f"⏰ Time: `{timestamp}`\n"
+                f"📄 Original Filename: `{file_name}`\n"
+                f"🔄 Renamed Filename: `{renamed_file_name}`\n"
+            )
+            
+            # Check if message is forwarded
+            forward_info = ""
+            if message.forward_from:
+                forward_info = f"🔀 Forwarded from: @{message.forward_from.username} ({message.forward_from.id})"
+            elif message.forward_sender_name:
+                forward_info = f"🔀 Forwarded from hidden user: {message.forward_sender_name}"
+            
+            # Send details to dump channel
+            await client.send_message(
+                Config.DUMP_CHANNEL,
+                f"{user_details}\n{forward_info}",
+                reply_to_message_id=forwarded_msg.message_id
+            )
+
         except Exception as e:
-            await message.reply_text(f"⚠️ Failed to forward to dump channel: {e}")
+            await message.reply_text(f"⚠️ Failed to log to dump channel: {e}")
 
     # Auto-Rename Logic (Runs only when not in sequence mode)
     format_template = await codeflixbots.get_format_template(user_id)
