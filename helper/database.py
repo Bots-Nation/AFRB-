@@ -183,7 +183,7 @@ class Database:
             logging.error(f"Error getting token for user {user_id}: {e}")
             return 69
 
-        async def set_media_preference(self, id, media_type):
+    async def set_media_preference(self, id, media_type):
         try:
             await self.col.update_one(
                 {"_id": int(id)}, {"$set": {"media_type": media_type}}
