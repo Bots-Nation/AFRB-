@@ -45,11 +45,12 @@ class Database:
         u = m.from_user
         if not await self.is_user_exist(u.id):
             user = self.new_user(u.id)
+            # Add user's actual information
+            user["first_name"] = u.first_name or "Unknown"
+            user["username"] = u.username or ""
             try:
                 await self.col.insert_one(user)
-                logging.info(f"User {u.id} added to the database.")
-            except Exception as e:
-                logging.error(f"Error adding user {u.id}: {e}")
+                logging.info(f"User {u.id} added to database")
 
     async def is_user_exist(self, id):
         try:
