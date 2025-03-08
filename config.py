@@ -7,21 +7,21 @@ class Config(object):
     # pyro client config
     API_ID    = os.environ.get("API_ID", "20604892")
     API_HASH  = os.environ.get("API_HASH", "a75d4dab1a2483a157d93e3ae9bf7500")
-    BOT_TOKEN = os.environ.get("BOT_TOKEN", "7052382347:AAE8JaBHoK2acDxBkWNBvKj4vqT0XmWQX98") 
+    BOT_TOKEN = os.environ.get("BOT_TOKEN", "7970885214:AAGnI8WyD8Qu8t6p3ZRsxCsqgUJcrBP0rs0") 
 
     # database config
-    DB_NAME = os.environ.get("DB_NAME","AutoRenamerBot")     
+    DB_NAME = os.environ.get("DB_NAME","AutoRenamerBot2")     
     DB_URL  = os.environ.get("DB_URL","mongodb+srv://nitinkumardhundhara:DARKXSIDE78@cluster0.wdive.mongodb.net/?retryWrites=true&w=majority")
     PORT = os.environ.get("PORT", "8080")
  
     # other configs
     BOT_UPTIME  = time.time()
-    START_PIC   = os.environ.get("START_PIC", "https://w0.peakpx.com/wallpaper/290/313/HD-wallpaper-anime-jujutsu-kaisen-satoru-gojo-boy.jpg")
+    START_PIC   = os.environ.get("START_PIC", "https://i.postimg.cc/xC5CxZFH/imgs.png")
     ADMIN       = [int(admin) if id_pattern.search(admin) else admin for admin in os.environ.get('ADMIN', '6302971969 7086472788 6039119180 1136967391').split()]
     FORCE_SUB_CHANNELS = os.environ.get('FORCE_SUB_CHANNELS', 'Bots_Nation, Bots_Nation_Support').split(',')
     LOG_CHANNEL = os.environ.get("LOG_CHANNEL", "-1002385922224")
-    DUMP_CHANNEL = os.environ.get("DUMP_CHANNEL", "-1002264269433")
-    BOT_USERNAME = os.environ.get("BOT_USERNAME", "AutoRenamerXBOt")
+    DUMP_CHANNEL = os.environ.get("DUMP_CHANNEL", "-1002277917960")
+    BOT_USERNAME = os.environ.get("BOT_USERNAME", "NovaAutoRenameBot")
     #TOKEN_API = "https://instantearn.in/api?api=fa0dc64a5224ed38ec7b25c70f40922a1f8aeb15&format=text"
     TOKEN_API = "533ce3f92f47b35345541ac59f7010de31fbeba7"
     SHORTENER_URL = "https://droplink.co/api"
