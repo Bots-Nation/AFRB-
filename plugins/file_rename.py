@@ -194,7 +194,7 @@ def extract_episode_number(filename):
     return None
 
 # Example Usage:
-filename = "Naruto Shippuden S01 - EP07 - 1080p [Dual Audio] @Codeflix_Bots.mkv"
+filename = "Naruto Shippuden S01 - EP07 - 1080p [Dual Audio] @Bots_Nation.mkv"
 episode_number = extract_episode_number(filename)
 print(f"Extracted Episode Number: {episode_number}")    
 
@@ -409,8 +409,9 @@ async def auto_rename_files(client, message: Message):
                 img.save(ph_path, "JPEG")
 
             try:
+                # Send to USER and capture the sent message
                 if media_type == "document":
-                    await client.send_document(
+                    user_sent_message = await client.send_document(
                         message.chat.id,
                         document=path,
                         thumb=ph_path,
@@ -419,7 +420,7 @@ async def auto_rename_files(client, message: Message):
                         progress_args=("Upload Started...", upload_msg, time.time()),
                     )
                 elif media_type == "video":
-                    await client.send_video(
+                    user_sent_message = await client.send_video(
                         message.chat.id,
                         video=path,
                         caption=caption,
@@ -429,7 +430,7 @@ async def auto_rename_files(client, message: Message):
                         progress_args=("Upload Started...", upload_msg, time.time()),
                     )
                 elif media_type == "audio":
-                    await client.send_audio(
+                    user_sent_message = await client.send_audio(
                         message.chat.id,
                         audio=path,
                         caption=caption,
@@ -438,10 +439,9 @@ async def auto_rename_files(client, message: Message):
                         progress=progress_for_pyrogram,
                         progress_args=("Upload Started...", upload_msg, time.time()),
                     )
-            except Exception as e:
-                logging.error(f"Error Upload file: {e}")
 
-            if Config.DUMP_CHANNEL:
+                # Now forward the sent message to DUMP CHANNEL with forward tag
+                if Config.DUMP_CHANNEL:
                     try:
                         timestamp = datetime.now(pytz.timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S %Z')
                         user_details = (
@@ -455,33 +455,11 @@ async def auto_rename_files(client, message: Message):
                             f"🔄 Renamed Filename: `{renamed_file_name}`\n"
                         )
 
-                        # Get file ID from user's sent message
-                        if media_type == "document":
-                            file_id = user_sent_message.document.file_id
-                        elif media_type == "video":
-                            file_id = user_sent_message.video.file_id
-                        elif media_type == "audio":
-                            file_id = user_sent_message.audio.file_id
-
-                        # Send to dump channel without forward tag
-                        if media_type == "document":
-                            await client.send_document(
-                                Config.DUMP_CHANNEL,
-                                file_id,
-                                caption=user_details
-                            )
-                        elif media_type == "video":
-                            await client.send_video(
-                                Config.DUMP_CHANNEL,
-                                file_id,
-                                caption=user_details
-                            )
-                        elif media_type == "audio":
-                            await client.send_audio(
-                                Config.DUMP_CHANNEL,
-                                file_id,
-                                caption=user_details
-                            )
+                        # Forward the user's sent message to dump channel
+                        await user_sent_message.forward(
+                            Config.DUMP_CHANNEL,
+                            caption=user_details
+                        )
 
                         logging.info(f"File forwarded to dump channel: {renamed_file_name}")
 
@@ -495,6 +473,10 @@ async def auto_rename_files(client, message: Message):
 
             await download_msg.delete() 
 
+        except Exception as e:
+            logging.error(f"Error in file processing: {e}")
+            await download_msg.edit(f"**Error:** {e}")
+
         finally:
             # Clean up
             if os.path.exists(renamed_file_path):
@@ -503,4 +485,5 @@ async def auto_rename_files(client, message: Message):
                 os.remove(metadata_file_path)
             if ph_path and os.path.exists(ph_path):
                 os.remove(ph_path)
-            del renaming_operations[file_id]
+            if file_id in renaming_operations:
+                del renaming_operations[file_id]
