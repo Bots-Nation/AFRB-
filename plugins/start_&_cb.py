@@ -311,7 +311,7 @@ async def start(client, message: Message):
     await m.delete()
 
     # Send sticker after the text sequence
-    await message.reply_sticker("CAACAgUAAyEFAASG9gJ5AAIBamfICWXwe0WZQp1ABwVjSSwajozLAAJ_CgACAn05VuxwSOp09a3uNgQ")
+    await message.reply_sticker("CAACAgEAAyEFAASOHochAAIC9GfMFUqGZzBgZ3DaK8dgDk8yX0ncAAKtBQACUBbYRvIrWNOOGEqTNgQ")
 
     # Define buttons for the start message
     buttons = InlineKeyboardMarkup([
@@ -411,7 +411,7 @@ async def cb_handler(client, query: CallbackQuery):
             text=Txt.DONATE_TXT,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("• ʙᴀᴄᴋ", callback_data="help"), InlineKeyboardButton("ᴏᴡɴᴇʀ •", url='https://t.me/DARKXSIDE78')]
+                [InlineKeyboardButton("• ʙᴀᴄᴋ", callback_data="help"), InlineKeyboardButton("ᴏᴡɴᴇʀ •", url='https://t.me/Blakite_Ravii')]
             ])
         )
     elif data == "file_names":
@@ -464,7 +464,7 @@ async def cb_handler(client, query: CallbackQuery):
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("• sᴜᴘᴘᴏʀᴛ", url='https://t.me/Bots_Nation_Support'), InlineKeyboardButton("ᴄᴏᴍᴍᴀɴᴅs •", callback_data="help")],
-                [InlineKeyboardButton("• ᴅᴇᴠᴇʟᴏᴘᴇʀ", url='https://t.me/DARKXSIDE78'), InlineKeyboardButton("ɴᴇᴛᴡᴏʀᴋ •", url='https://t.me/Bots_Nation')],
+                [InlineKeyboardButton("• ᴅᴇᴠᴇʟᴏᴘᴇʀ", url='https://t.me/Blakite_Ravii'), InlineKeyboardButton("ɴᴇᴛᴡᴏʀᴋ •", url='https://t.me/Bots_Nation')],
                 [InlineKeyboardButton("• ʙᴀᴄᴋ •", callback_data="home")]
             ])
         )
@@ -481,7 +481,7 @@ async def cb_handler(client, query: CallbackQuery):
 @Client.on_message(filters.command("donate"))
 async def donation(client, message):
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data="help"), InlineKeyboardButton(text="ᴏᴡɴᴇʀ", url='https://t.me/DARKXSIDE78')]
+        [InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data="help"), InlineKeyboardButton(text="ᴏᴡɴᴇʀ", url='https://t.me/Blakite_Ravii')]
     ])
     yt = await message.reply_photo(photo='https://graph.org/file/1919fe077848bd0783d4c.jpg', caption=Txt.DONATE_TXT, reply_markup=buttons)
     await asyncio.sleep(300)
@@ -492,7 +492,7 @@ async def donation(client, message):
 @Client.on_message(filters.command("premium"))
 async def getpremium(bot, message):
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("ᴏᴡɴᴇʀ", url="https://t.me/DARKXSIDE78"), InlineKeyboardButton("ᴄʟᴏsᴇ", callback_data="close")]
+        [InlineKeyboardButton("ᴏᴡɴᴇʀ", url="https://t.me/Blakite_Ravii"), InlineKeyboardButton("ᴄʟᴏsᴇ", callback_data="close")]
     ])
     yt = await message.reply_photo(photo='https://graph.org/file/feebef43bbdf76e796b1b.jpg', caption=Txt.PREMIUM_TXT, reply_markup=buttons)
     await asyncio.sleep(300)
