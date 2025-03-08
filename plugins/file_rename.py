@@ -194,7 +194,7 @@ def extract_episode_number(filename):
     return None
 
 # Example Usage:
-filename = "Naruto Shippuden S01 - EP07 - 1080p [Dual Audio] @Codeflix_Bots.mkv"
+filename = "Naruto Shippuden S01 - EP07 - 1080p [Dual Audio] @Bots_Nation.mkv"
 episode_number = extract_episode_number(filename)
 print(f"Extracted Episode Number: {episode_number}")    
 
@@ -374,197 +374,116 @@ async def auto_rename_files(client, message: Message):
                 await download_msg.edit(f"**Metadata Error:**\n{error_message}")
                 return
                 
+            # Use the new metadata file path for the upload
             path = metadata_file_path
 
-            upload_successful = False
-            sent_message = None
+            # Upload the file
+            upload_msg = await download_msg.edit("**__Uploading...__**")
+            await codeflixbots.col.update_one(
+                {"_id": user_id},
+                {"$inc": {"rename_count": 1}}
+            )
 
-            if Config.DUMP_CHANNEL:
-                try:
-                    timestamp = datetime.now(pytz.timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S %Z')
-                    user_details = (
-                        f"👤 **User Details**\n"
-                        f"• ID: `{user.id}`\n"
-                        f"• Name: {user.first_name or 'Unknown'}\n"
-                        f"• Username: @{user.username if user.username else 'N/A'}\n"
-                        f"• Premium: {'✅' if is_premium else '❌'}\n"
-                        f"⏰ Time: `{timestamp}`\n"
-                        f"📄 Original Filename: `{file_name}`\n"
-                        f"🔄 Renamed Filename: `{renamed_file_name}`\n"
+            ph_path = None
+            c_caption = await codeflixbots.get_caption(message.chat.id)
+            c_thumb = await codeflixbots.get_thumbnail(message.chat.id)
+
+            caption = (
+                c_caption.format(
+                    filename=renamed_file_name,
+                    filesize=humanbytes(message.document.file_size),
+                    duration=convert(0),
+                )
+                if c_caption
+                else f"**{renamed_file_name}**"
+            )
+
+            if c_thumb:
+                ph_path = await client.download_media(c_thumb)
+            elif media_type == "video" and message.video.thumbs:
+                ph_path = await client.download_media(message.video.thumbs[0].file_id)
+
+            if ph_path:
+                img = Image.open(ph_path).convert("RGB")
+                img = img.resize((320, 320))
+                img.save(ph_path, "JPEG")
+
+            try:
+                # Send to USER and capture the sent message
+                if media_type == "document":
+                    user_sent_message = await client.send_document(
+                        message.chat.id,
+                        document=path,
+                        thumb=ph_path,
+                        caption=caption,
+                        progress=progress_for_pyrogram,
+                        progress_args=("Upload Started...", upload_msg, time.time()),
+                    )
+                elif media_type == "video":
+                    user_sent_message = await client.send_video(
+                        message.chat.id,
+                        video=path,
+                        caption=caption,
+                        thumb=ph_path,
+                        duration=0,
+                        progress=progress_for_pyrogram,
+                        progress_args=("Upload Started...", upload_msg, time.time()),
+                    )
+                elif media_type == "audio":
+                    user_sent_message = await client.send_audio(
+                        message.chat.id,
+                        audio=path,
+                        caption=caption,
+                        thumb=ph_path,
+                        duration=0,
+                        progress=progress_for_pyrogram,
+                        progress_args=("Upload Started...", upload_msg, time.time()),
                     )
 
-                    forward_info = ""
-                    if message.forward_from:
-                        forward_info = f"🔀 Forwarded from: @{message.forward_from.username} ({message.forward_from.id})"
-                    elif message.forward_sender_name:
-                        forward_info = f"🔀 Forwarded from hidden user: {message.forward_sender_name}"
+                # Now forward the sent message to DUMP CHANNEL with forward tag
+                if Config.DUMP_CHANNEL:
+                    try:
+                        timestamp = datetime.now(pytz.timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S %Z')
+                        user_details = (
+                            f"👤 **User Details**\n"
+                            f"• ID: `{user.id}`\n"
+                            f"• Name: {user.first_name or 'Unknown'}\n"
+                            f"• Username: @{user.username if user.username else 'N/A'}\n"
+                            f"• Premium: {'✅' if is_premium else '❌'}\n"
+                            f"⏰ Time: `{timestamp}`\n"
+                            f"📄 Original Filename: `{file_name}`\n"
+                            f"🔄 Renamed Filename: `{renamed_file_name}`\n"
+                        )
 
-                    if media_type == "document":
-                        sent_message = await client.send_document(
+                        # Forward the user's sent message to dump channel
+                        await user_sent_message.forward(
                             Config.DUMP_CHANNEL,
-                            document=path,
-                            caption=f"{user_details}\n{forward_info}",
-                        )
-                    elif media_type == "video":
-                        sent_message = await client.send_video(
-                            Config.DUMP_CHANNEL,
-                            video=path,
-                            caption=f"{user_details}\n{forward_info}",
-                        )
-                    elif media_type == "audio":
-                        sent_message = await client.send_audio(
-                            Config.DUMP_CHANNEL,
-                            audio=path,
-                            caption=f"{user_details}\n{forward_info}",
+                            caption=user_details
                         )
 
-                    logging.info(f"File successfully sent to dump channel: {renamed_file_name}")
+                        logging.info(f"File forwarded to dump channel: {renamed_file_name}")
 
-                    if sent_message:
-                        if media_type == "document":
-                            file_id_dump = sent_message.document.file_id
-                            file_size = sent_message.document.file_size
-                        elif media_type == "video":
-                            file_id_dump = sent_message.video.file_id
-                            file_size = sent_message.video.file_size
-                        elif media_type == "audio":
-                            file_id_dump = sent_message.audio.file_id
-                            file_size = sent_message.audio.file_size
+                    except Exception as e:
+                        error_msg = f"⚠️ Failed to forward file to dump channel: {str(e)}"
+                        await client.send_message(Config.LOG_CHANNEL, error_msg)
+                        logging.error(error_msg, exc_info=True)
 
-                        ph_path = None
-                        c_caption = await codeflixbots.get_caption(message.chat.id)
-                        c_thumb = await codeflixbots.get_thumbnail(message.chat.id)
+            except Exception as e:
+                logging.error(f"Error Upload file: {e}")
 
-                        caption = (
-                            c_caption.format(
-                                filename=renamed_file_name,
-                                filesize=humanbytes(file_size),
-                                duration=convert(0),
-                            )
-                            if c_caption
-                            else f"**{renamed_file_name}**"
-                        )
+            await download_msg.delete() 
 
-                        if c_thumb:
-                            ph_path = await client.download_media(c_thumb)
-                        elif media_type == "video" and message.video.thumbs:
-                            ph_path = await client.download_media(message.video.thumbs[0].file_id)
-
-                        if ph_path:
-                            img = Image.open(ph_path).convert("RGB")
-                            img = img.resize((320, 320))
-                            img.save(ph_path, "JPEG")
-
-                        await download_msg.edit("**__Forwarding...__**")
-                        await codeflixbots.col.update_one(
-                            {"_id": user_id},
-                            {"$inc": {"rename_count": 1}}
-                        )
-
-                        try:
-                            if media_type == "document":
-                                await client.send_document(
-                                    message.chat.id,
-                                    file_id_dump,
-                                    caption=caption,
-                                    thumb=ph_path,
-                                )
-                            elif media_type == "video":
-                                await client.send_video(
-                                    message.chat.id,
-                                    file_id_dump,
-                                    caption=caption,
-                                    thumb=ph_path,
-                                )
-                            elif media_type == "audio":
-                                await client.send_audio(
-                                    message.chat.id,
-                                    file_id_dump,
-                                    caption=caption,
-                                    thumb=ph_path,
-                                )
-                            upload_successful = True
-                        except Exception as e:
-                            logging.error(f"Error forwarding file: {e}")
-                            upload_successful = False
-
-                except Exception as e:
-                    error_msg = f"⚠️ Failed to send renamed file to dump channel: {str(e)}"
-                    await client.send_message(Config.LOG_CHANNEL, error_msg)
-                    logging.error(error_msg, exc_info=True)
-                    upload_successful = False
-
-            if not upload_successful:
-                upload_msg = await download_msg.edit("**__Uploading...__**")
-                await codeflixbots.col.update_one(
-                    {"_id": user_id},
-                    {"$inc": {"rename_count": 1}}
-                )
-
-                ph_path = None
-                c_caption = await codeflixbots.get_caption(message.chat.id)
-                c_thumb = await codeflixbots.get_thumbnail(message.chat.id)
-
-                caption = (
-                    c_caption.format(
-                        filename=renamed_file_name,
-                        filesize=humanbytes(message.document.file_size),
-                        duration=convert(0),
-                    )
-                    if c_caption
-                    else f"**{renamed_file_name}**"
-                )
-
-                if c_thumb:
-                    ph_path = await client.download_media(c_thumb)
-                elif media_type == "video" and message.video.thumbs:
-                    ph_path = await client.download_media(message.video.thumbs[0].file_id)
-
-                if ph_path:
-                    img = Image.open(ph_path).convert("RGB")
-                    img = img.resize((320, 320))
-                    img.save(ph_path, "JPEG")
-
-                try:
-                    if media_type == "document":
-                        await client.send_document(
-                            message.chat.id,
-                            document=path,
-                            thumb=ph_path,
-                            caption=caption,
-                            progress=progress_for_pyrogram,
-                            progress_args=("Upload Started...", upload_msg, time.time()),
-                        )
-                    elif media_type == "video":
-                        await client.send_video(
-                            message.chat.id,
-                            video=path,
-                            caption=caption,
-                            thumb=ph_path,
-                            duration=0,
-                            progress=progress_for_pyrogram,
-                            progress_args=("Upload Started...", upload_msg, time.time()),
-                        )
-                    elif media_type == "audio":
-                        await client.send_audio(
-                            message.chat.id,
-                            audio=path,
-                            caption=caption,
-                            thumb=ph_path,
-                            duration=0,
-                            progress=progress_for_pyrogram,
-                            progress_args=("Upload Started...", upload_msg, time.time()),
-                        )
-                except Exception as e:
-                    logging.error(f"Error Upload file: {e}")
-
-                await download_msg.delete()
+        except Exception as e:
+            logging.error(f"Error in file processing: {e}")
+            await download_msg.edit(f"**Error:** {e}")
 
         finally:
+            # Clean up
             if os.path.exists(renamed_file_path):
                 os.remove(renamed_file_path)
             if os.path.exists(metadata_file_path):
                 os.remove(metadata_file_path)
             if ph_path and os.path.exists(ph_path):
                 os.remove(ph_path)
-            del renaming_operations[file_id]
+            if file_id in renaming_operations:
+                del renaming_operations[file_id]
