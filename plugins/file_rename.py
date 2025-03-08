@@ -201,6 +201,7 @@ print(f"Extracted Episode Number: {episode_number}")
 @Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
 async def auto_rename_files(client, message: Message):
     user_id = message.from_user.id
+    user = message.from_user
 
     # Check if the user is an admin.
     is_admin = False
@@ -259,45 +260,6 @@ async def auto_rename_files(client, message: Message):
             active_sequences[user_id].append(file_info)
             await message.reply_text(f"File received in sequence...")
             return
-
-        # Forward original file to dump channel
-        if Config.DUMP_CHANNEL:
-            try:
-                # Forward original file first
-                forwarded_msg = await message.forward(Config.DUMP_CHANNEL)
-            
-                # Prepare user details message
-                timestamp = datetime.now(pytz.timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S %Z')
-                user_details = (
-                f"👤 **User Details**\n"
-                f"• ID: `{user.id}`\n"
-                f"• Name: {user.first_name or 'Unknown'}\n"
-                f"• Username: @{user.username}\n"
-                f"• Premium: {'✅' if is_premium else '❌'}\n"
-                f"⏰ Time: `{timestamp}`\n"
-                f"📄 Original Filename: `{file_name}`\n"
-                f"🔄 Renamed Filename: `{renamed_file_name}`\n"
-            )
-            
-                # Check if message is forwarded
-                forward_info = ""
-                if message.forward_from:
-                    forward_info = f"🔀 Forwarded from: @{message.forward_from.username} ({message.forward_from.id})"
-                elif message.forward_sender_name:
-                    forward_info = f"🔀 Forwarded from hidden user: {message.forward_sender_name}"
-            
-                # Send details to dump channel
-                await client.send_message(
-                    Config.DUMP_CHANNEL,
-                    f"{user_details}\n{forward_info}",
-                    reply_to_message_id=forwarded_msg.message_id
-                )
-
-            except Exception as e:
-                await client.send_message(
-                    Config.LOG_CHANNEL, 
-                    f"⚠️ Failed to log to dump channel: {e}"
-                )
 
         # Auto-Rename Logic (Runs only when not in sequence mode)
         format_template = await codeflixbots.get_format_template(user_id)
@@ -411,9 +373,59 @@ async def auto_rename_files(client, message: Message):
                 error_message = stderr.decode()
                 await download_msg.edit(f"**Metadata Error:**\n{error_message}")
                 return
-
+                
             # Use the new metadata file path for the upload
             path = metadata_file_path
+                
+            if Config.DUMP_CHANNEL:
+                try:
+                # Prepare user details
+                    timestamp = datetime.now(pytz.timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S %Z')
+                    user_details = (
+                        f"👤 **User Details**\n"
+                        f"• ID: `{user.id}`\n"
+                        f"• Name: {user.first_name or 'Unknown'}\n"
+                        f"• Username: @{user.username if user.username else 'N/A'}\n"
+                        f"• Premium: {'✅' if is_premium else '❌'}\n"
+                        f"⏰ Time: `{timestamp}`\n"
+                        f"📄 Original Filename: `{file_name}`\n"
+                        f"🔄 Renamed Filename: `{renamed_file_name}`\n"
+                    )
+
+                # Check if message is forwarded
+                    forward_info = ""
+                    if message.forward_from:
+                        forward_info = f"🔀 Forwarded from: @{message.forward_from.username} ({message.forward_from.id})"
+                    elif message.forward_sender_name:
+                        forward_info = f"🔀 Forwarded from hidden user: {message.forward_sender_name}"
+
+                # Send the renamed file to the dump channel
+                    if media_type == "document":
+                        sent_message = await client.send_document(
+                            Config.DUMP_CHANNEL,
+                            document=path,
+                            caption=f"{user_details}\n{forward_info}",
+                        )
+                    elif media_type == "video":
+                        sent_message = await client.send_video(
+                            Config.DUMP_CHANNEL,
+                            video=path,
+                            caption=f"{user_details}\n{forward_info}",
+                        )
+                    elif media_type == "audio":
+                        sent_message = await client.send_audio(
+                            Config.DUMP_CHANNEL,
+                            audio=path,
+                            caption=f"{user_details}\n{forward_info}",
+                        )
+
+                    # Log success
+                    logging.info(f"File successfully sent to dump channel: {renamed_file_name}")
+
+                except Exception as e:
+                    error_msg = f"⚠️ Failed to send renamed file to dump channel: {str(e)}"
+                    await client.send_message(Config.LOG_CHANNEL, error_msg)
+                    logging.error(error_msg, exc_info=True)
 
             # Upload the file
             upload_msg = await download_msg.edit("**__Uploading...__**")
