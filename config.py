@@ -7,7 +7,7 @@ class Config(object):
     # pyro client config
     API_ID    = os.environ.get("API_ID", "20604892")
     API_HASH  = os.environ.get("API_HASH", "a75d4dab1a2483a157d93e3ae9bf7500")
-    BOT_TOKEN = os.environ.get("BOT_TOKEN", "7807784141:AAGFLYW5Iyl7Vi5deJ_xcGsxqYv8WoTPZVA") 
+    BOT_TOKEN = os.environ.get("BOT_TOKEN", "7052382347:AAE8JaBHoK2acDxBkWNBvKj4vqT0XmWQX98") 
 
     # database config
     DB_NAME = os.environ.get("DB_NAME","AutoRenamerBot")     
@@ -16,12 +16,13 @@ class Config(object):
  
     # other configs
     BOT_UPTIME  = time.time()
-    START_PIC   = os.environ.get("START_PIC", "https://static.vecteezy.com/system/resources/thumbnails/036/095/205/small_2x/ai-generated-beautiful-anime-girl-photo.jpg")
+    START_PIC   = os.environ.get("START_PIC", "https://w0.peakpx.com/wallpaper/290/313/HD-wallpaper-anime-jujutsu-kaisen-satoru-gojo-boy.jpg")
     ADMIN       = [int(admin) if id_pattern.search(admin) else admin for admin in os.environ.get('ADMIN', '6302971969 7086472788 6039119180 1136967391').split()]
-    FORCE_SUB_CHANNELS = os.environ.get('FORCE_SUB_CHANNELS', '@Bots_Nation').split(',')
+    FORCE_SUB_CHANNELS = os.environ.get('FORCE_SUB_CHANNELS', 'Bots_Nation, Bots_Nation_Support').split(',')
     LOG_CHANNEL = os.environ.get("LOG_CHANNEL", "-1002385922224")
     DUMP_CHANNEL = os.environ.get("DUMP_CHANNEL", "-1002264269433")
-    BOT_USERNAME = os.environ.get("BOT_USERNAME", "TestX9Anime_Bot")
+    BOT_USERNAME = os.environ.get("BOT_USERNAME", "AutoRenamerXBOt")
+    #TOKEN_API = "https://instantearn.in/api?api=fa0dc64a5224ed38ec7b25c70f40922a1f8aeb15&format=text"
     TOKEN_API = "533ce3f92f47b35345541ac59f7010de31fbeba7"
     SHORTENER_URL = "https://droplink.co/api"
     TOKEN_ID_LENGTH = 8  # Length of token IDs

@@ -29,7 +29,8 @@ async def restart_bot(b, m):
         # Restart the bot process
         os.execl(sys.executable, sys.executable, *sys.argv)
 
-@Client.on_message(filters.command("leadboard") & filters.user(Config.ADMIN))
+@Client.on_message(filters.private & filters.command("leaderboard"))
+#@Client.on_message(filters.command("leaderboard") & filters.user(Config.ADMIN))
 async def show_leaderboard(bot: Client, message: Message):
     try:
         users = await codeflixbots.col.find().sort("rename_count", -1).limit(10).to_list(10)
