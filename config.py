@@ -23,7 +23,7 @@ class Config(object):
     DUMP_CHANNEL = os.environ.get("DUMP_CHANNEL", "-1002277917960")
     BOT_USERNAME = os.environ.get("BOT_USERNAME", "NovaAutoRenameBot")
     #TOKEN_API = "https://instantearn.in/api?api=fa0dc64a5224ed38ec7b25c70f40922a1f8aeb15&format=text"
-    TOKEN_API = "533ce3f92f47b35345541ac59f7010de31fbeba7"
+    TOKEN_API = "acc6e6472d44943f4f91ae36e4e2431d432c59fe"
     SHORTENER_URL = "https://droplink.co/api"
     TOKEN_ID_LENGTH = 8  # Length of token IDs
     
