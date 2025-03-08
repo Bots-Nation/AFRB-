@@ -16,7 +16,7 @@ class Config(object):
  
     # other configs
     BOT_UPTIME  = time.time()
-    START_PIC   = os.environ.get("START_PIC", "https://static.vecteezy.com/system/resources/thumbnails/036/095/205/small_2x/ai-generated-beautiful-anime-girl-photo.jpg")
+    START_PIC   = os.environ.get("START_PIC", "https://w0.peakpx.com/wallpaper/290/313/HD-wallpaper-anime-jujutsu-kaisen-satoru-gojo-boy.jpg")
     ADMIN       = [int(admin) if id_pattern.search(admin) else admin for admin in os.environ.get('ADMIN', '6302971969 7086472788 6039119180 1136967391').split()]
     FORCE_SUB_CHANNELS = os.environ.get('FORCE_SUB_CHANNELS', 'Bots_Nation').split(',')
     LOG_CHANNEL = os.environ.get("LOG_CHANNEL", "-1002385922224")
