@@ -1,3 +1,4 @@
+
 import aiohttp, asyncio, warnings, pytz
 from datetime import datetime, timedelta
 from pytz import timezone
@@ -64,7 +65,7 @@ class Bot(Client):
                     ),
                     reply_markup=InlineKeyboardMarkup(
                         [[
-                            InlineKeyboardButton("ᴜᴘᴅᴀᴛᴇs", url="https://t.me/Blakite_Ravii")
+                            InlineKeyboardButton("ᴜᴘᴅᴀᴛᴇs", url="https://t.me/DARKXSIDE78")
                         ]]
                     )
                 )
