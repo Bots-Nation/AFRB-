@@ -203,13 +203,15 @@ async def auto_rename_files(client, message: Message):
     user_id = message.from_user.id
     user = message.from_user
 
+    # Initialize file_id and file_name early
+    file_id = None
+    file_name = None
+
     # Check if the user is an admin.
     is_admin = False
     if hasattr(Config, "ADMINS") and user_id in Config.ADMINS:
         is_admin = True
 
-    
-    
     # Check premium status
     user_data = await codeflixbots.col.find_one({"_id": int(user_id)})  
     is_premium = user_data.get("is_premium", False) if user_data else False
@@ -253,6 +255,17 @@ async def auto_rename_files(client, message: Message):
 
     async with semaphore:
         if user_id in active_sequences:
+            # Ensure file_id and file_name are defined
+            if message.document:
+                file_id = message.document.file_id
+                file_name = message.document.file_name
+            elif message.video:
+                file_id = message.video.file_id
+                file_name = f"{message.video.file_name}.mp4"
+            elif message.audio:
+                file_id = message.audio.file_id
+                file_name = f"{message.audio.file_name}.mp3"
+
             file_info = {
                 "file_id": file_id,
                 "file_name": file_name if file_name else "Unknown"
@@ -484,6 +497,11 @@ async def auto_rename_files(client, message: Message):
             if os.path.exists(renamed_file_path):
                 os.remove(renamed_file_path)
             if os.path.exists(metadata_file_path):
+                os.remove(metadata_file_path)
+            if ph_path and os.path.exists(ph_path):
+                os.remove(ph_path)
+            if file_id in renaming_operations:
+                del renaming_operations[file_id]
                 os.remove(metadata_file_path)
             if ph_path and os.path.exists(ph_path):
                 os.remove(ph_path)
