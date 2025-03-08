@@ -18,7 +18,7 @@ class Config(object):
     BOT_UPTIME  = time.time()
     START_PIC   = os.environ.get("START_PIC", "https://iili.io/3KDcyZB.md.jpg")
     ADMIN       = [int(admin) if id_pattern.search(admin) else admin for admin in os.environ.get('ADMIN', '6302971969 7086472788 6039119180 1136967391').split()]
-    FORCE_SUB_CHANNELS = os.environ.get('FORCE_SUB_CHANNELS', 'Bots_Nation, Bots_Nation_Support').split(',')
+    FORCE_SUB_CHANNELS = os.environ.get('FORCE_SUB_CHANNELS', 'Bots_Nation,Bots_Nation_Support').split(',')
     LOG_CHANNEL = os.environ.get("LOG_CHANNEL", "-1002385922224")
     DUMP_CHANNEL = os.environ.get("DUMP_CHANNEL", "-1002264269433")
     BOT_USERNAME = os.environ.get("BOT_USERNAME", "AutoRenamerXRavi_Bot")
